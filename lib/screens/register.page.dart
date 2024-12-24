@@ -1,10 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'dart:convert';
+import 'package:controllapp/services/auth_service.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -21,7 +22,10 @@ class _RegisterPageState extends State<RegisterPage> {
 
   final ImagePicker _picker = ImagePicker();
   XFile? _pickedImage;
+  String? _base64Image;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  bool isImageSelected = false;
 
   // Default profile picture URL
   final String defaultPhotoURL =
@@ -29,10 +33,17 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Future<void> pickImage() async {
     try {
-      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 800, // Limit image size
+        maxHeight: 800,
+      );
       if (image != null) {
+        final bytes = await image.readAsBytes();
         setState(() {
           _pickedImage = image;
+          _base64Image = base64Encode(bytes);
+          isImageSelected = true;
         });
       } else {
         Fluttertoast.showToast(msg: "No image selected.");
@@ -43,8 +54,12 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> signUp() async {
+    if (!isImageSelected) {
+      Fluttertoast.showToast(msg: "Please select a profile picture");
+      return;
+    }
+
     try {
-      // Create user with email and password
       UserCredential userCredential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
@@ -54,49 +69,27 @@ class _RegisterPageState extends State<RegisterPage> {
       User? user = userCredential.user;
 
       if (user != null) {
-        String? photoURL = defaultPhotoURL;
+        String? photoData = _base64Image ?? '';
 
-        // Upload the profile picture to Firebase Storage if selected
-        if (_pickedImage != null) {
-          try {
-            final storageRef = FirebaseStorage.instance
-                .ref()
-                .child('profile_pictures/${user.uid}');
-            final uploadTask =
-                await storageRef.putFile(File(_pickedImage!.path));
-
-            // Ensure the upload task was successful before getting the download URL
-            if (uploadTask.state == TaskState.success) {
-              photoURL = await storageRef.getDownloadURL();
-            } else {
-              Fluttertoast.showToast(msg: "Failed to upload profile picture.");
-            }
-          } catch (e) {
-            Fluttertoast.showToast(msg: "Error uploading profile picture: $e");
-          }
-        }
-
-        // Update user profile with display name and photo URL
+        // Update user profile with display name
         await user.updateDisplayName(_nameController.text.trim());
-        if (photoURL != null) {
-          await user.updatePhotoURL(photoURL);
-        }
 
-        // Save additional user information to Firestore
+        // Save user information to Firestore
         await _firestore.collection('users').doc(user.uid).set({
           'uid': user.uid,
           'fullName': _nameController.text.trim(),
           'email': _emailController.text.trim(),
-          'profilePictureUrl': photoURL,
+          'profileImage': photoData, // Store base64 string
           'createdAt': FieldValue.serverTimestamp(),
         });
 
-        // Show success message and navigate
         Fluttertoast.showToast(
           msg: "Registration successful!",
           toastLength: Toast.LENGTH_SHORT,
         );
-        Navigator.pushReplacementNamed(context, '/home');
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
       }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
@@ -137,18 +130,36 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                GestureDetector(
-                  onTap: pickImage,
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundImage: _pickedImage != null
-                        ? FileImage(File(_pickedImage!.path))
-                        : NetworkImage(defaultPhotoURL) as ImageProvider,
-                    child: _pickedImage == null
-                        ? const Icon(Icons.add_a_photo, size: 50)
-                        : null,
-                  ),
+                Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.grey[300],
+                      backgroundImage: _pickedImage != null
+                          ? FileImage(File(_pickedImage!.path))
+                          : null,
+                      child: _pickedImage == null
+                          ? const Icon(Icons.person, size: 50, color: Colors.grey)
+                          : null,
+                    ),
+                    Positioned(
+                      bottom: -10,
+                      right: -10,
+                      child: IconButton(
+                        icon: const Icon(Icons.add_a_photo),
+                        onPressed: pickImage,
+                      ),
+                    ),
+                  ],
                 ),
+                if (!isImageSelected)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      'Profile picture is required',
+                      style: TextStyle(color: Colors.red, fontSize: 12),
+                    ),
+                  ),
                 const SizedBox(height: 16.0),
                 TextFormField(
                   controller: _nameController,
@@ -216,8 +227,10 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 16.0),
                 ElevatedButton(
                   onPressed: () {
-                    if (_formKey.currentState!.validate()) {
+                    if (_formKey.currentState!.validate() && isImageSelected) {
                       signUp();
+                    } else if (!isImageSelected) {
+                      Fluttertoast.showToast(msg: "Please select a profile picture");
                     }
                   },
                   child: const Text('Register',
