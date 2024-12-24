@@ -2,8 +2,10 @@ import 'package:controllapp/firebase_options.dart';
 import 'package:controllapp/screens/home.page.dart';
 import 'package:controllapp/screens/login.page.dart';
 import 'package:controllapp/screens/register.page.dart';
+import 'package:controllapp/screens/settings.page.dart'; // Add this import
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'services/auth_service.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,13 +24,21 @@ class MainApp extends StatelessWidget {
         useMaterial3: true,
       ),
       title: 'Yahya APP',
-      //home: const HomePage(),
-      initialRoute: '/login',
+      home: AuthService.isAuthenticated() ? const HomePage() : const LoginPage(),
       routes: {
-        '/login':(context)=> LoginPage(),
-        '/register': (context)=>RegisterPage(),
-        '/home':(context)=>HomePage(),
-        }
+        '/login': (context) => AuthService.isAuthenticated() 
+            ? const HomePage() 
+            : const LoginPage(),
+        '/register': (context) => AuthService.isAuthenticated() 
+            ? const HomePage() 
+            : const RegisterPage(),
+        '/home': (context) => AuthService.isAuthenticated() 
+            ? const HomePage() 
+            : const LoginPage(),
+        '/settings': (context) => AuthService.isAuthenticated() 
+            ? const SettingsPage()  // Changed this line
+            : const LoginPage(),
+      }
     );
   }
 }
