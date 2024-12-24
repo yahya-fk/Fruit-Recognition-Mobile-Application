@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:controllapp/services/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -15,6 +16,22 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _passwordVisibility = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Check if user is already authenticated on init
+    checkAuth();
+  }
+
+  void checkAuth() {
+    if (AuthService.isAuthenticated()) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(context, '/home');
+      });
+    }
+  }
+
   Future<void> SignIn() async {
     try {
       UserCredential userCredential =
@@ -24,10 +41,9 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       if (userCredential.user != null) {
-        print("Signed in: ${userCredential.user?.email}");
+        if (!mounted) return;
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text("Sign-in successful")));
-        // Naviguer vers la page d'accueil (Home) après une connexion réussie
+            .showSnackBar(const SnackBar(content: Text("Sign-in successful")));
         Navigator.pushReplacementNamed(context, '/home');
       }
     } on FirebaseAuthException catch (e) {
