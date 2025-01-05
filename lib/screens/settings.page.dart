@@ -1,3 +1,4 @@
+import 'package:controllapp/widgets/app_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -114,120 +115,186 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final Size screenSize = MediaQuery.of(context).size;
+    final double safeAreaPadding = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Settings", style: TextStyle(color: Colors.white)),
+        elevation: 0,
+        title: Text(
+          "SETTINGS",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: screenSize.width * 0.06,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
+          ),
+        ),
         centerTitle: true,
-        backgroundColor: Colors.amberAccent,
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(color: Colors.amber),
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: 60,
-                    width: 60,
-                    child: CircleAvatar(
-                      backgroundImage: getProfileImage(),
-                    ),
-                  ),
-                  Text(userName, style: TextStyle(color: Colors.white, fontSize: 20)),
-                  Text(userEmail, style: TextStyle(color: Colors.white, fontSize: 15)),
-                ],
-              ),
-            ),
-            ListTile(
-              leading: Icon(Icons.home),
-              title: Text('Covid Tracker'),
-              onTap: () {
-                Navigator.pushReplacementNamed(context, '/home');
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.android),
-              title: Text('Emsi Chatbot'),
-              onTap: () {
-                Navigator.pushReplacementNamed(context, '/home');
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.settings),
-              trailing: Icon(Icons.arrow_forward),
-              title: Text('Settings'),
-              onTap: () {
-                Navigator.pop(context); // Just close drawer since we're already on settings
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.logout),
-              title: Text('Logout'),
-              onTap: () async {
-                await _auth.signOut();
-                Navigator.pushReplacementNamed(context, '/login');
-              },
-            )
-          ],
+        backgroundColor: Colors.amber.shade400,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(20),
+          ),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              GestureDetector(
-                onTap: pickImage,
-                child: CircleAvatar(
-                  radius: 50,
-                  backgroundImage: getProfileImage(),
+      drawer: AppDrawer(),
+      body: SafeArea(
+        child: Container(
+          width: screenSize.width,
+          height: screenSize.height - safeAreaPadding,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.amber.shade100,
+                Colors.white,
+              ],
+            ),
+          ),
+          child: SingleChildScrollView(
+            physics: BouncingScrollPhysics(),
+            child: Padding(
+              padding: EdgeInsets.all(screenSize.width * 0.05),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    Card(
+                      elevation: 8,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(screenSize.width * 0.05),
+                        child: Column(
+                          children: [
+                            GestureDetector(
+                              onTap: pickImage,
+                              child: Container(
+                                height: screenSize.width * 0.25,
+                                width: screenSize.width * 0.25,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.amber.shade400,
+                                    width: 3,
+                                  ),
+                                ),
+                                child: CircleAvatar(
+                                  backgroundImage: getProfileImage(),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: screenSize.height * 0.02),
+                            Text(
+                              'Profile Settings',
+                              style: TextStyle(
+                                fontSize: screenSize.width * 0.06,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.amber.shade700,
+                              ),
+                            ),
+                            SizedBox(height: screenSize.height * 0.02),
+                            TextFormField(
+                              controller: _fullNameController,
+                              decoration: InputDecoration(
+                                labelText: 'Full Name',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.amber.shade400,
+                                    width: 2,
+                                  ),
+                                ),
+                                prefixIcon: Icon(Icons.person, color: Colors.amber.shade400),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: screenSize.height * 0.02),
+                    Card(
+                      elevation: 8,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(screenSize.width * 0.05),
+                        child: Column(
+                          children: [
+                            Text(
+                              'Security',
+                              style: TextStyle(
+                                fontSize: screenSize.width * 0.06,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.amber.shade700,
+                              ),
+                            ),
+                            SizedBox(height: screenSize.height * 0.02),
+                            TextFormField(
+                              controller: _currentPasswordController,
+                              decoration: InputDecoration(
+                                labelText: 'Current Password',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                prefixIcon: Icon(Icons.lock, color: Colors.amber.shade400),
+                              ),
+                              obscureText: true,
+                            ),
+                            SizedBox(height: screenSize.height * 0.02),
+                            TextFormField(
+                              controller: _newPasswordController,
+                              decoration: InputDecoration(
+                                labelText: 'New Password',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                prefixIcon: Icon(Icons.lock_outline, color: Colors.amber.shade400),
+                              ),
+                              obscureText: true,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: screenSize.height * 0.03),
+                    ElevatedButton(
+                      onPressed: () {
+                        updateUserProfile();
+                        if (_currentPasswordController.text.isNotEmpty &&
+                            _newPasswordController.text.isNotEmpty) {
+                          updatePassword();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.amber.shade400,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: screenSize.width * 0.08,
+                          vertical: screenSize.width * 0.04,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        'Save Changes',
+                        style: TextStyle(
+                          fontSize: screenSize.width * 0.045,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _fullNameController,
-                decoration: InputDecoration(
-                  labelText: 'Full Name',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _currentPasswordController,
-                decoration: InputDecoration(
-                  labelText: 'Current Password',
-                  border: OutlineInputBorder(),
-                ),
-                obscureText: true,
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _newPasswordController,
-                decoration: InputDecoration(
-                  labelText: 'New Password',
-                  border: OutlineInputBorder(),
-                ),
-                obscureText: true,
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  updateUserProfile();
-                  if (_currentPasswordController.text.isNotEmpty &&
-                      _newPasswordController.text.isNotEmpty) {
-                    updatePassword();
-                  }
-                },
-                child: Text('Save Changes'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.amberAccent,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
