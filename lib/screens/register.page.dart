@@ -116,134 +116,245 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final Size screenSize = MediaQuery.of(context).size;
+    final double safeAreaPadding = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Register"),
+        elevation: 0,
+        title: Text(
+          "REGISTER",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: screenSize.width * 0.06,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
+          ),
+        ),
         centerTitle: true,
+        backgroundColor: Colors.amber.shade400,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(20),
+          ),
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
+      body: SafeArea(
+        child: Container(
+          width: screenSize.width,
+          height: screenSize.height - safeAreaPadding,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.amber.shade100, Colors.white],
+            ),
+          ),
           child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Stack(
+            physics: BouncingScrollPhysics(),
+            child: Padding(
+              padding: EdgeInsets.all(screenSize.width * 0.05),
+              child: Form(
+                key: _formKey,
+                child: Column(
                   children: [
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundColor: Colors.grey[300],
-                      backgroundImage: _pickedImage != null
-                          ? FileImage(File(_pickedImage!.path))
-                          : null,
-                      child: _pickedImage == null
-                          ? const Icon(Icons.person, size: 50, color: Colors.grey)
-                          : null,
+                    Card(
+                      elevation: 8,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(screenSize.width * 0.05),
+                        child: Column(
+                          children: [
+                            GestureDetector(
+                              onTap: pickImage,
+                              child: Stack(
+                                children: [
+                                  Container(
+                                    height: screenSize.width * 0.3,
+                                    width: screenSize.width * 0.3,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.amber.shade400,
+                                        width: 3,
+                                      ),
+                                    ),
+                                    child: CircleAvatar(
+                                      radius: screenSize.width * 0.15,
+                                      backgroundColor: Colors.grey[300],
+                                      backgroundImage: _pickedImage != null
+                                          ? FileImage(File(_pickedImage!.path))
+                                          : null,
+                                      child: _pickedImage == null
+                                          ? Icon(Icons.person,
+                                              size: screenSize.width * 0.15,
+                                              color: Colors.grey)
+                                          : null,
+                                    ),
+                                  ),
+                                  Positioned(
+                                    bottom: 0,
+                                    right: 0,
+                                    child: Container(
+                                      padding: EdgeInsets.all(screenSize.width * 0.02),
+                                      decoration: BoxDecoration(
+                                        color: Colors.amber.shade400,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(Icons.camera_alt,
+                                          size: screenSize.width * 0.05,
+                                          color: Colors.white),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (!isImageSelected)
+                              Padding(
+                                padding: EdgeInsets.only(top: screenSize.height * 0.01),
+                                child: Text(
+                                  'Profile picture is required',
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontSize: screenSize.width * 0.035,
+                                  ),
+                                ),
+                              ),
+                            SizedBox(height: screenSize.height * 0.02),
+                            TextFormField(
+                              controller: _nameController,
+                              decoration: InputDecoration(
+                                labelText: 'Full Name',
+                                prefixIcon: Icon(Icons.person, color: Colors.amber.shade400),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.amber.shade400,
+                                    width: 2,
+                                  ),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your full name';
+                                }
+                                return null;
+                              },
+                            ),
+                            SizedBox(height: screenSize.height * 0.02),
+                            TextFormField(
+                              controller: _emailController,
+                              decoration: InputDecoration(
+                                labelText: 'Email',
+                                prefixIcon: Icon(Icons.email, color: Colors.amber.shade400),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.amber.shade400,
+                                    width: 2,
+                                  ),
+                                ),
+                              ),
+                              keyboardType: TextInputType.emailAddress,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your email';
+                                } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                                    .hasMatch(value)) {
+                                  return 'Please enter a valid email address';
+                                }
+                                return null;
+                              },
+                            ),
+                            SizedBox(height: screenSize.height * 0.02),
+                            TextFormField(
+                              controller: _passwordController,
+                              obscureText: !_passwordVisibility,
+                              decoration: InputDecoration(
+                                labelText: 'Password',
+                                prefixIcon: Icon(Icons.lock, color: Colors.amber.shade400),
+                                suffixIcon: IconButton(
+                                  onPressed: () => setState(() => _passwordVisibility = !_passwordVisibility),
+                                  icon: Icon(
+                                    _passwordVisibility ? Icons.visibility : Icons.visibility_off,
+                                    color: Colors.amber.shade400,
+                                  ),
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.amber.shade400,
+                                    width: 2,
+                                  ),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your password';
+                                } else if (value.length < 6) {
+                                  return 'Password must be at least 6 characters long';
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    Positioned(
-                      bottom: -10,
-                      right: -10,
-                      child: IconButton(
-                        icon: const Icon(Icons.add_a_photo),
-                        onPressed: pickImage,
+                    SizedBox(height: screenSize.height * 0.03),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate() && isImageSelected) {
+                          signUp();
+                        } else if (!isImageSelected) {
+                          Fluttertoast.showToast(msg: "Please select a profile picture");
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.amber.shade400,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: screenSize.width * 0.15,
+                          vertical: screenSize.width * 0.04,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        'Register',
+                        style: TextStyle(
+                          fontSize: screenSize.width * 0.045,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: screenSize.height * 0.02),
+                    TextButton(
+                      onPressed: () => Navigator.pushNamed(context, "/login"),
+                      child: Text(
+                        'Already have an account? Log in',
+                        style: TextStyle(
+                          color: Colors.amber.shade700,
+                          fontSize: screenSize.width * 0.04,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                if (!isImageSelected)
-                  const Padding(
-                    padding: EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      'Profile picture is required',
-                      style: TextStyle(color: Colors.red, fontSize: 12),
-                    ),
-                  ),
-                const SizedBox(height: 16.0),
-                TextFormField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Full Name',
-                    prefixIcon: Icon(Icons.person),
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your full name';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16.0),
-                TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: Icon(Icons.email),
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
-                        .hasMatch(value)) {
-                      return 'Please enter a valid email address';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16.0),
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: !_passwordVisibility,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    prefixIcon: const Icon(Icons.lock),
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _passwordVisibility = !_passwordVisibility;
-                        });
-                      },
-                      icon: Icon(
-                        _passwordVisibility
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                      ),
-                    ),
-                    border: const OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
-                    } else if (value.length < 6) {
-                      return 'Password must be at least 6 characters long';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16.0),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate() && isImageSelected) {
-                      signUp();
-                    } else if (!isImageSelected) {
-                      Fluttertoast.showToast(msg: "Please select a profile picture");
-                    }
-                  },
-                  child: const Text('Register',
-                      style: TextStyle(fontSize: 18, color: Colors.black)),
-                ),
-                const SizedBox(height: 16.0),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, "/login");
-                  },
-                  child: const Text('Already have an account? Log in',
-                      style: TextStyle(color: Colors.black)),
-                ),
-              ],
+              ),
             ),
           ),
         ),

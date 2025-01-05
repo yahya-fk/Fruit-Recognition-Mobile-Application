@@ -97,101 +97,181 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final Size screenSize = MediaQuery.of(context).size;
+    final double safeAreaPadding = MediaQuery.of(context).padding.top;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Login"),
+        elevation: 0,
+        title: Text(
+          "LOGIN",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: screenSize.width * 0.06,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
+          ),
+        ),
         centerTitle: true,
+        backgroundColor: Colors.amber.shade400,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(20),
+          ),
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
-                child: Image.asset(
-                  'images/application.jpg', // Replace with your image path
-                  width: double.infinity,
-                  height: 220.0,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              const SizedBox(height: 24.0),
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  prefixIcon: Icon(Icons.email),
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
-                  } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                    return 'Please enter a valid email address';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16.0),
-              TextFormField(
-                controller: _passwordController,
-                obscureText: !_passwordVisibility,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  prefixIcon: const Icon(Icons.lock),
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _passwordVisibility = !_passwordVisibility;
-                      });
-                    },
-                    icon: Icon(
-                      _passwordVisibility
-                          ? Icons.visibility
-                          : Icons.visibility_off,
+      body: SafeArea(
+        child: Container(
+          width: screenSize.width,
+          height: screenSize.height - safeAreaPadding,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.amber.shade100, Colors.white],
+            ),
+          ),
+          child: SingleChildScrollView(
+            physics: BouncingScrollPhysics(),
+            child: Padding(
+              padding: EdgeInsets.all(screenSize.width * 0.05),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    SizedBox(height: screenSize.height * 0.02),
+                    Card(
+                      elevation: 8,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
+                        child: Image.asset(
+                          'images/logo.png',
+                          width: screenSize.width * 0.7,
+                          height: screenSize.width * 0.7,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                     ),
-                  ),
-                  border: const OutlineInputBorder(),
+                    SizedBox(height: screenSize.height * 0.04),
+                    Card(
+                      elevation: 8,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(screenSize.width * 0.05),
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              controller: _emailController,
+                              decoration: InputDecoration(
+                                labelText: 'Email',
+                                prefixIcon: Icon(Icons.email,
+                                    color: Colors.amber.shade400),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                      color: Colors.amber.shade400, width: 2),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your email';
+                                } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                                    .hasMatch(value)) {
+                                  return 'Please enter a valid email address';
+                                }
+                                return null;
+                              },
+                            ),
+                            SizedBox(height: screenSize.height * 0.02),
+                            TextFormField(
+                              controller: _passwordController,
+                              obscureText: !_passwordVisibility,
+                              decoration: InputDecoration(
+                                labelText: 'Password',
+                                prefixIcon: Icon(Icons.lock,
+                                    color: Colors.amber.shade400),
+                                suffixIcon: IconButton(
+                                  onPressed: () => setState(() =>
+                                      _passwordVisibility =
+                                          !_passwordVisibility),
+                                  icon: Icon(
+                                    _passwordVisibility
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                    color: Colors.amber.shade400,
+                                  ),
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                      color: Colors.amber.shade400, width: 2),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your password';
+                                } else if (value.length < 6) {
+                                  return 'Password must be at least 6 characters long';
+                                }
+                                return null;
+                              },
+                            ),
+                            SizedBox(height: screenSize.height * 0.03),
+                            ElevatedButton(
+                              onPressed: () {
+                                if (_formKey.currentState!.validate()) SignIn();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.amber.shade400,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: screenSize.width * 0.15,
+                                  vertical: screenSize.width * 0.04,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                'Login',
+                                style: TextStyle(
+                                  fontSize: screenSize.width * 0.045,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: screenSize.height * 0.02),
+                    TextButton(
+                      onPressed: () =>
+                          Navigator.pushNamed(context, "/register"),
+                      child: Text(
+                        'Create a new account',
+                        style: TextStyle(
+                          color: Colors.amber.shade700,
+                          fontSize: screenSize.width * 0.04,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your password';
-                  } else if (value.length < 6) {
-                    return 'Password must be at least 6 characters long';
-                  }
-                  return null;
-                },
               ),
-              const SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    SignIn(); // Call the SignIn method when the form is valid
-                  }
-                },
-                child: const Text(
-                  'Login',
-                  style: TextStyle(fontSize: 18, color: Colors.black),
-                ),
-              ),
-
-              const SizedBox(height: 16.0),
-              TextButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Navigate to registration')),
-                  );
-                  Navigator.pushNamed(context, "/register");
-                },
-                child: const Text('Create a new account',
-                style: TextStyle(color: Colors.black),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
