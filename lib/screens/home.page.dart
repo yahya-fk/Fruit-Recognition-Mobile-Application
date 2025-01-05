@@ -34,7 +34,8 @@ class _HomePageState extends State<HomePage> {
   Future<void> loadUserData() async {
     User? user = _auth.currentUser;
     if (user != null) {
-      DocumentSnapshot userData = await _firestore.collection('users').doc(user.uid).get();
+      DocumentSnapshot userData =
+          await _firestore.collection('users').doc(user.uid).get();
       if (userData.exists) {
         setState(() {
           userName = userData['fullName'] ?? '';
@@ -109,10 +110,10 @@ class _HomePageState extends State<HomePage> {
             ),
             ListTile(
               leading: Icon(Icons.android),
-              title: Text('Emsi Chatbot'),
+              title: Text('Model'),
               onTap: () {
-                Navigator.pop(context);
-              },
+                Navigator.pop(context); // Close drawer first
+                Navigator.pushReplacementNamed(context, '/model');              },
             ),
             ListTile(
               leading: Icon(Icons.settings),
@@ -120,7 +121,8 @@ class _HomePageState extends State<HomePage> {
               title: Text('Settings'),
               onTap: () {
                 Navigator.pop(context); // Close drawer first
-                Navigator.pushReplacementNamed(context, '/settings'); // Use pushReplacement instead of push
+                Navigator.pushReplacementNamed(context,
+                    '/settings'); // Use pushReplacement instead of push
               },
             ),
             ListTile(
