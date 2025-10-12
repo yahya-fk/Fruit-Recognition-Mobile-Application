@@ -14,6 +14,7 @@ class _ImageClassificationScreenState extends State<ImageClassificationScreen> {
   late Interpreter _interpreter;
   late List<String> _classNames;
   String _predictionResult = "";
+  // ignore: unused_field
   double _confidence = 0.0;
   File? _image;
   bool _isLoading = false;

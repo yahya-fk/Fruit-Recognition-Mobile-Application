@@ -2,6 +2,7 @@ import 'package:controllapp/firebase_options.dart';
 import 'package:controllapp/screens/home.page.dart';
 import 'package:controllapp/screens/image_classification_screen.dart';
 import 'package:controllapp/screens/login.page.dart';
+import 'package:controllapp/screens/real_time_classification.page.dart';
 import 'package:controllapp/screens/register.page.dart';
 import 'package:controllapp/screens/settings.page.dart'; // Add this import
 import 'package:firebase_core/firebase_core.dart';
@@ -43,6 +44,9 @@ class MainApp extends StatelessWidget {
               : const LoginPage(),
           '/model': (context) => AuthService.isAuthenticated()
               ? ImageClassificationScreen()
+              : const LoginPage(),
+          '/classifier': (context) => AuthService.isAuthenticated()
+              ? RealtimeClassificationScreen()
               : const LoginPage(),
         });
   }

@@ -269,13 +269,8 @@ class _HomePageState extends State<HomePage> {
                               context,
                               Icons.track_changes,
                               'Track',
-                              () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content:
-                                          Text('Coming Soon ...')),
-                                );
-                              },
+                              () => Navigator.pushReplacementNamed(
+                                  context, '/classifier'),
                             ),
                             _buildActionButton(
                               context,
