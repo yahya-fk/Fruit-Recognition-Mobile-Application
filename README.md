@@ -182,5 +182,5 @@ Contributions are welcome! Please open an issue to discuss changes. For PRs:
 
 ## License
 
-This project currently has no license specified. Consider adding one (e.g., MIT) to clarify usage.
+This project currently has no license specified. 
 
